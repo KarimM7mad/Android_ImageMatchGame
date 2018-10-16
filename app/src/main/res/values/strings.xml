@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Image Match</string>
+    <string name="startBtnTxt">Start</string>
+    <string name="highScoreBtnTxt">High Scores</string>
+    <string name="ExitBtnTxt">Exit</string>
+
+
+</resources>
