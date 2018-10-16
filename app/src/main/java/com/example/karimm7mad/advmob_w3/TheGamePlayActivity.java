@@ -1,20 +1,17 @@
 package com.example.karimm7mad.advmob_w3;
 
 import android.annotation.SuppressLint;
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.Random;
@@ -29,7 +26,7 @@ public class TheGamePlayActivity extends AppCompatActivity {
     public Intent audioServiceIntent;
     public static boolean GameIsActive = false;
     int timeTaken;
-    public DBAdapter dbman;
+    public DBAdapter dbman = null;
     AlertDialog.Builder builder = null;
 
     @Override
@@ -37,69 +34,43 @@ public class TheGamePlayActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_the_game_play);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-
         this.dbman = new DBAdapter(this.getBaseContext());
         this.dbman.open();
-
-        appearingIndex1 = -1;
-        appearingIndex2 = -1;
-        tmpoooo = -1;
-
-        audioServiceIntent = new Intent(TheGamePlayActivity.this, AudioService.class);
-
-        this.initializeImgBtns();
+        this.audioServiceIntent = new Intent(TheGamePlayActivity.this, AudioService.class);
+        this.appearingIndex1 = -1;
+        this.appearingIndex2 = -1;
+        this.tmpoooo = -1;
         this.timeTaken = (int) System.currentTimeMillis();
+        this.initializeImgBtns();
     }
-
-
     public void createDialog() {
         final EditText usernameEditTxt = new EditText(this);
-        usernameEditTxt.setHint("enter Your name");
-
+        usernameEditTxt.setHint("Enter Your name here");
         this.builder = new AlertDialog.Builder(this);
-        this.builder.setTitle("Congrants");
-        this.builder.setMessage("You Finished in " + this.timeTaken + " seconds\n\tEnter your name and save");
+        this.builder.setTitle("Congrants ;-)");
+        this.builder.setMessage("You Finished in " + this.timeTaken + " seconds.\nEnter your name and save");
         this.builder.setView(usernameEditTxt);
         this.builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
-                Log.i("info", "debug : getting Username");
-
                 String namee = usernameEditTxt.getText().toString();
-                Log.i("info", "debug : the name is ----------------------> "+namee);
-
-                if (namee.equalsIgnoreCase("enter Your name")) {
-                    Toast.makeText(getBaseContext(), "Enter your name or cancel", Toast.LENGTH_SHORT).show();
-                } else {
-                    Log.i("info", "debug : data is about to be inserted..........");
-                    Log.i("info", "debug : name:" + namee + " " + "timetaken: " + timeTaken+"..................");
-                    try {
-                        long x = dbman.insertRow(namee, (int) timeTaken);
-                        Log.i("info", "debug : dbman inserted data sucessfully..........");
-                    }
-                    catch (Exception e){
-
-                        Log.i("info", "debug : EXCEPTION--->"+e.getMessage());
-                    }
-                    dbman.close();
-                    Log.i("info", "debug : dbman inserted and is closed.......");
-                    Log.i("info", "debug : dialog is canceled......");
-                    dialog.cancel();
+                if (namee.equalsIgnoreCase("enter Your name") || namee.isEmpty()) {
+                    namee = "No Name :-(";
                 }
+                dbman.insertRow(namee, (int) timeTaken);
+                dbman.close();
+                dialog.cancel();
+                finish();
             }
         });
         this.builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 dbman.close();
-                Log.i("info", "debug : dialog is canceled......");
                 dialog.cancel();
+                finish();
             }
         });
-        Log.i("info", "debug :showing dialog ....................");
         this.builder.create().show();
-        Log.i("info", "debug : show dialog finished");
     }
-
-
     @SuppressLint("ResourceType")
     private void initializeImgBtns() {
         //generate the random pics and audio indices
@@ -117,7 +88,6 @@ public class TheGamePlayActivity extends AppCompatActivity {
             tmpoooo = i;
             this.imagesBtn[i].setOnClickListener(new View.OnClickListener() {
                 int btnIndex = tmpoooo;
-
                 @Override
                 public void onClick(View v) {
                     callCheckMatchIfPossible(btnIndex);
@@ -125,10 +95,8 @@ public class TheGamePlayActivity extends AppCompatActivity {
             });
         }
     }
-
     @SuppressLint("ResourceType")
     public void callCheckMatchIfPossible(int pieceNum) {
-        Log.i("info", "debug : start call check match if possible");
         //appearing index = -1 indicates that no btn in clicked
         imagesBtn[pieceNum].setImageResource(imagesNumber[pieceNum]);
         if (appearingIndex1 == -1) {
@@ -152,42 +120,30 @@ public class TheGamePlayActivity extends AppCompatActivity {
                 appearingIndex2 = -1;
             }
         }
-        Log.i("info", "debug : finish call check match if possible");
     }
 
     @SuppressLint("ResourceType")
     public void checkMatch() {
-        Log.i("info", "debug : start check match");
         if (this.imagesNumber[appearingIndex1] == this.imagesNumber[appearingIndex2]) {
-            Log.i("info", "debug : the 2 match");
             this.imagesBtn[appearingIndex1].setClickable(false);
             this.imagesBtn[appearingIndex2].setClickable(false);
+            Toast.makeText(this.getBaseContext(), "Match ;-)", Toast.LENGTH_SHORT).show();
             checkWinState();
         } else {
+            Toast.makeText(this.getBaseContext(), "No Match :-(", Toast.LENGTH_SHORT).show();
             this.imagesBtn[appearingIndex1].setImageResource(R.raw.questionmarkimg);
             this.imagesBtn[appearingIndex2].setImageResource(R.raw.questionmarkimg);
         }
         appearingIndex1 = -1;
         appearingIndex2 = -1;
-        Log.i("info", "debug : end check match");
     }
-
     public void checkWinState() {
-        Log.i("info", "debug : start call check win");
-        for (int i = 0; i < numOfBtns; i++) {
-            if (this.imagesBtn[i].isClickable() == true) {
+        for (int i = 0; i < numOfBtns; i++)
+            if (this.imagesBtn[i].isClickable())
                 return;
-            }
-        }
-        this.timeTaken = (int) ((System.currentTimeMillis() - this.timeTaken) / 1000);
-        Toast.makeText(this.getBaseContext(), "You Win in " + this.timeTaken + " seconds", Toast.LENGTH_SHORT).show();
-        Log.i("info", "debug : start Dialog process");
+        this.timeTaken = (((int) System.currentTimeMillis() - this.timeTaken) / 1000);
         this.createDialog();
-        Log.i("info", "debug : finish Dialog process");
-        Log.i("info", "debug : finish check win , GAME FINISHED");
     }
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
     //generate the random images
     public void generateRandomIntNumbers() {
         Log.i("info", "debug : start generate rnd num");
@@ -221,7 +177,6 @@ public class TheGamePlayActivity extends AppCompatActivity {
         }
         Log.i("info", "debug : finish generate rnd num");
     }
-
     //to get the resources in term of integer Values in imageNumber
     public int getMappedImgId(int id) {
         switch (id) {
@@ -236,7 +191,6 @@ public class TheGamePlayActivity extends AppCompatActivity {
         }
         return R.raw.questionmarkimg;
     }
-
     public int getMappedAudId(int id) {
         switch (id) {
             case 0:
@@ -250,14 +204,12 @@ public class TheGamePlayActivity extends AppCompatActivity {
         }
         return R.raw.questionmarkimg;
     }
-
     @Override
     protected void onDestroy() {
         Log.i("info", "debug : start on destroy");
         super.onDestroy();
         Log.i("info", "debug : finish super on destroy");
         stopService(audioServiceIntent);
-2        Log.i("info", "debug : all is goood");
 
     }
 }
