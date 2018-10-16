@@ -1,6 +1,7 @@
 package com.example.karimm7mad.advmob_w3;
 
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -12,6 +13,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,26 +28,75 @@ public class TheGamePlayActivity extends AppCompatActivity {
     public int appearingIndex1, appearingIndex2, tmpoooo;
     public Intent audioServiceIntent;
     public static boolean GameIsActive = false;
-    long timeTaken;
-
+    int timeTaken;
+    public DBAdapter dbman;
+    AlertDialog.Builder builder = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_the_game_play);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+
+        this.dbman = new DBAdapter(this.getBaseContext());
+        this.dbman.open();
+
         appearingIndex1 = -1;
         appearingIndex2 = -1;
         tmpoooo = -1;
+
         audioServiceIntent = new Intent(TheGamePlayActivity.this, AudioService.class);
+
         this.initializeImgBtns();
-        this.timeTaken = System.currentTimeMillis();
+        this.timeTaken = (int) System.currentTimeMillis();
+    }
 
 
-//        TheGamePlayActivity.GameIsActive = true;
-//        asyncTask to use trial and failed
-//        new TimeCounter().execute((TextView) findViewById(R.id.timeTxtView));
+    public void createDialog() {
+        final EditText usernameEditTxt = new EditText(this);
+        usernameEditTxt.setHint("enter Your name");
 
+        this.builder = new AlertDialog.Builder(this);
+        this.builder.setTitle("Congrants");
+        this.builder.setMessage("You Finished in " + this.timeTaken + " seconds\n\tEnter your name and save");
+        this.builder.setView(usernameEditTxt);
+        this.builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                Log.i("info", "debug : getting Username");
+
+                String namee = usernameEditTxt.getText().toString();
+                Log.i("info", "debug : the name is ----------------------> "+namee);
+
+                if (namee.equalsIgnoreCase("enter Your name")) {
+                    Toast.makeText(getBaseContext(), "Enter your name or cancel", Toast.LENGTH_SHORT).show();
+                } else {
+                    Log.i("info", "debug : data is about to be inserted..........");
+                    Log.i("info", "debug : name:" + namee + " " + "timetaken: " + timeTaken+"..................");
+                    try {
+                        long x = dbman.insertRow(namee, (int) timeTaken);
+                        Log.i("info", "debug : dbman inserted data sucessfully..........");
+                    }
+                    catch (Exception e){
+
+                        Log.i("info", "debug : EXCEPTION--->"+e.getMessage());
+                    }
+                    dbman.close();
+                    Log.i("info", "debug : dbman inserted and is closed.......");
+                    Log.i("info", "debug : dialog is canceled......");
+                    dialog.cancel();
+                }
+            }
+        });
+        this.builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                dbman.close();
+                Log.i("info", "debug : dialog is canceled......");
+                dialog.cancel();
+            }
+        });
+        Log.i("info", "debug :showing dialog ....................");
+        this.builder.create().show();
+        Log.i("info", "debug : show dialog finished");
     }
 
 
@@ -128,11 +179,13 @@ public class TheGamePlayActivity extends AppCompatActivity {
                 return;
             }
         }
-        this.timeTaken = (System.currentTimeMillis() - this.timeTaken) / 1000;
+        this.timeTaken = (int) ((System.currentTimeMillis() - this.timeTaken) / 1000);
         Toast.makeText(this.getBaseContext(), "You Win in " + this.timeTaken + " seconds", Toast.LENGTH_SHORT).show();
-        Log.i("info", "debug : finish check win");
+        Log.i("info", "debug : start Dialog process");
+        this.createDialog();
+        Log.i("info", "debug : finish Dialog process");
+        Log.i("info", "debug : finish check win , GAME FINISHED");
     }
-
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     //generate the random images
@@ -204,7 +257,7 @@ public class TheGamePlayActivity extends AppCompatActivity {
         super.onDestroy();
         Log.i("info", "debug : finish super on destroy");
         stopService(audioServiceIntent);
-        Log.i("info", "debug : all is goood");
+2        Log.i("info", "debug : all is goood");
 
     }
 }

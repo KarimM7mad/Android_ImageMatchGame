@@ -92,9 +92,12 @@ public class DBAdapter {
         // Also change the function's arguments to be what you need!
         // Create row's data:
         ContentValues initialValues = new ContentValues();
+
+        Log.i("info", "debug : initialValue ref="+initialValues);
+
+
         initialValues.put(KEY_NAME, name);
         initialValues.put(KEY_SCORE, score);
-
         // Insert it into the database.
         return db.insert(DATABASE_TABLE, null, initialValues);
     }
@@ -150,7 +153,6 @@ public class DBAdapter {
         ContentValues newValues = new ContentValues();
         newValues.put(KEY_NAME, name);
         newValues.put(KEY_SCORE, score);
-
         // Insert it into the database.
         return db.update(DATABASE_TABLE, newValues, where, null) != 0;
     }
