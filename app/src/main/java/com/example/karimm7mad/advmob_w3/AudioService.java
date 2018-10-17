@@ -13,6 +13,8 @@ public class AudioService extends Service {
     public MediaPlayer lionAudioPlayer;
     public MediaPlayer owlAudioPlayer;
     public MediaPlayer eagleAudioPlayer;
+    public MediaPlayer rightAudioPlayer;
+    public MediaPlayer wrongAudioPlayer;
 
 
     @Override
@@ -26,6 +28,10 @@ public class AudioService extends Service {
         owlAudioPlayer.setLooping(false);
         eagleAudioPlayer = MediaPlayer.create(this, R.raw.eagleaud);
         eagleAudioPlayer.setLooping(false);
+        rightAudioPlayer= MediaPlayer.create(this, R.raw.right);
+        rightAudioPlayer.setLooping(false);
+        wrongAudioPlayer = MediaPlayer.create(this, R.raw.wrong);
+        wrongAudioPlayer.setLooping(false);
     }
 
     @Override
@@ -35,8 +41,8 @@ public class AudioService extends Service {
         lionAudioPlayer.stop();
         owlAudioPlayer.stop();
         eagleAudioPlayer.stop();
-
-
+        rightAudioPlayer.stop();
+        wrongAudioPlayer.stop();
     }
 
     @Override
@@ -52,6 +58,11 @@ public class AudioService extends Service {
             owlAudioPlayer.start();
         else if (x == R.raw.dogaud)
             dogAudioPlayer.start();
+        else if(x==R.raw.right)
+            rightAudioPlayer.start();
+        else if(x==R.raw.wrong)
+            wrongAudioPlayer.start();
+
 
         return super.onStartCommand(intent, flags, startId);
     }

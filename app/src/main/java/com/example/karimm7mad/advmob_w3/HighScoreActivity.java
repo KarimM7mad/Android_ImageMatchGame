@@ -36,7 +36,7 @@ public class HighScoreActivity extends AppCompatActivity {
                 username = c.getString(DBAdapter.COL_NAME);
                 timeTaken = c.getFloat(DBAdapter.COL_SCORE);
                 timestamp = c.getString(DBAdapter.COL_TIMESTAMP);
-                record = id + " " + username + " " + timeTaken + " " + timestamp + "";
+                record = timestamp +"\n"+id + "-" + username + "\nscore: " + timeTaken ;
                 this.records[c.getPosition()] = record;
                 record = "";
             } while (c.moveToNext());

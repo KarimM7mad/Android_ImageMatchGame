@@ -12,14 +12,16 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import java.util.Random;
+
 
 public class TheGamePlayActivity extends AppCompatActivity {
 
     public static int numOfBtns = 8;
     public ImageButton[] imagesBtn = null;
+    public TextView inGameTxtPreview = null;
     public int[] audioNumber = null;
     public int[] imagesNumber = null;
     public int appearingIndex1, appearingIndex2, tmpoooo;
@@ -36,6 +38,7 @@ public class TheGamePlayActivity extends AppCompatActivity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         this.dbman = new DBAdapter(this.getBaseContext());
         this.dbman.open();
+        this.inGameTxtPreview = findViewById(R.id.timeTxtView);
         this.audioServiceIntent = new Intent(TheGamePlayActivity.this, AudioService.class);
         this.appearingIndex1 = -1;
         this.appearingIndex2 = -1;
@@ -43,6 +46,7 @@ public class TheGamePlayActivity extends AppCompatActivity {
         this.timeTaken = (int) System.currentTimeMillis();
         this.initializeImgBtns();
     }
+    //you win dialog code is here
     public void createDialog() {
         final EditText usernameEditTxt = new EditText(this);
         usernameEditTxt.setHint("Enter Your name here");
@@ -71,6 +75,7 @@ public class TheGamePlayActivity extends AppCompatActivity {
         });
         this.builder.create().show();
     }
+    //intialize the buttons along with their positioning
     @SuppressLint("ResourceType")
     private void initializeImgBtns() {
         //generate the random pics and audio indices
@@ -88,6 +93,7 @@ public class TheGamePlayActivity extends AppCompatActivity {
             tmpoooo = i;
             this.imagesBtn[i].setOnClickListener(new View.OnClickListener() {
                 int btnIndex = tmpoooo;
+
                 @Override
                 public void onClick(View v) {
                     callCheckMatchIfPossible(btnIndex);
@@ -95,13 +101,14 @@ public class TheGamePlayActivity extends AppCompatActivity {
             });
         }
     }
+    //decide when to start Matching and previewing pieces
     @SuppressLint("ResourceType")
     public void callCheckMatchIfPossible(int pieceNum) {
         //appearing index = -1 indicates that no btn in clicked
         imagesBtn[pieceNum].setImageResource(imagesNumber[pieceNum]);
         if (appearingIndex1 == -1) {
             appearingIndex1 = pieceNum;
-            audioServiceIntent.putExtra("voiceName", audioNumber[pieceNum]);
+            audioServiceIntent.putExtra("voiceName",audioNumber[pieceNum]);
             startService(audioServiceIntent);
         }
         // one image is clicked and checking second btn
@@ -109,8 +116,6 @@ public class TheGamePlayActivity extends AppCompatActivity {
             //if not the same as btn 1 , then check the match of the 2 images
             if (pieceNum != appearingIndex1) {
                 appearingIndex2 = pieceNum;
-                audioServiceIntent.putExtra("voiceName", audioNumber[pieceNum]);
-                startService(audioServiceIntent);
                 this.checkMatch();
             }
             //the 2 btns are the same , hide the selected btn
@@ -121,22 +126,27 @@ public class TheGamePlayActivity extends AppCompatActivity {
             }
         }
     }
-
     @SuppressLint("ResourceType")
+    // check whether a match is found or not
     public void checkMatch() {
         if (this.imagesNumber[appearingIndex1] == this.imagesNumber[appearingIndex2]) {
             this.imagesBtn[appearingIndex1].setClickable(false);
             this.imagesBtn[appearingIndex2].setClickable(false);
-            Toast.makeText(this.getBaseContext(), "Match ;-)", Toast.LENGTH_SHORT).show();
+            this.inGameTxtPreview.setText("Match ;-)");
+            audioServiceIntent.putExtra("voiceName",R.raw.right);
+            startService(audioServiceIntent);
             checkWinState();
         } else {
-            Toast.makeText(this.getBaseContext(), "No Match :-(", Toast.LENGTH_SHORT).show();
+            this.inGameTxtPreview.setText("No Match :-(");
+            audioServiceIntent.putExtra("voiceName",R.raw.wrong);
+            startService(audioServiceIntent);
             this.imagesBtn[appearingIndex1].setImageResource(R.raw.questionmarkimg);
             this.imagesBtn[appearingIndex2].setImageResource(R.raw.questionmarkimg);
         }
         appearingIndex1 = -1;
         appearingIndex2 = -1;
     }
+    //used to check whether the user guessed all or not
     public void checkWinState() {
         for (int i = 0; i < numOfBtns; i++)
             if (this.imagesBtn[i].isClickable())
@@ -144,9 +154,8 @@ public class TheGamePlayActivity extends AppCompatActivity {
         this.timeTaken = (((int) System.currentTimeMillis() - this.timeTaken) / 1000);
         this.createDialog();
     }
-    //generate the random images
+    //generate the random images/audios positions
     public void generateRandomIntNumbers() {
-        Log.i("info", "debug : start generate rnd num");
         this.imagesNumber = new int[numOfBtns];
         this.audioNumber = new int[numOfBtns];
         Random r = new Random();
@@ -175,9 +184,8 @@ public class TheGamePlayActivity extends AppCompatActivity {
             this.audioNumber[i] = this.getMappedAudId(this.audioNumber[i]);
             this.imagesNumber[i] = this.getMappedImgId(this.imagesNumber[i]);
         }
-        Log.i("info", "debug : finish generate rnd num");
     }
-    //to get the resources in term of integer Values in imageNumber
+    //to get the resources in term of integer Values in imageNumber/audioNumber
     public int getMappedImgId(int id) {
         switch (id) {
             case 0:
