@@ -1,7 +1,7 @@
 # ImageMatchGame
 
 Android application mainly designed for children entering the world of preschool and beginning their paths as students but it also works with users at any age when they are learning a new language. The goal is to design a fun touchscreen application that teaches users the names of animals and birds through a memory matching game.
-### Main Features of the App:
+### App Design Requirements:
 - A simple matching game that allows the player to click on a card to see the picture behind.
 - When the picture of an animal is displayed, the name of that animal is also played (as a soundfile).
 - The player can only see two cards at a time.
