@@ -8,8 +8,7 @@ Android application mainly designed for children entering the world of preschool
 - If two pictures are matched, they will be removed from the game board.
 - Score is calculated based on the game completion time – your choice!- Players will see the score at the end of the game and they can then exit or restart the game.
 - The animals/birds/ locations is set randomly at the beginning of the game.
-- The app should handle the orientation changes correctly.
-For database implementation:
+  #### For database implementation:
 - A login screen where users enter their usernames
 - A history log window
 - A database to store the usernames, scores, and timestamp
